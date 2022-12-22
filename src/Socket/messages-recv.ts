@@ -209,10 +209,10 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 				const participants = getBinaryNodeChildren(child, 'participant').map(p => p.attrs.jid)
 				if(
 					participants.length === 1 &&
-                        // if recv. "remove" message and sender removed themselves
-                        // mark as left
-                        areJidsSameUser(participants[0], node.attrs.participant) &&
-                        child.tag === 'remove'
+						// if recv. "remove" message and sender removed themselves
+						// mark as left
+						areJidsSameUser(participants[0], node.attrs.participant) &&
+						child.tag === 'remove'
 				) {
 					result.messageStubType = WAMessageStubType.GROUP_PARTICIPANT_LEAVE
 				}
@@ -233,7 +233,14 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 				result.messageStubType = WAMessageStubType.GROUP_CHANGE_RESTRICT
 				result.messageStubParameters = [ (child.tag === 'locked') ? 'on' : 'off' ]
 				break
-
+			case 'description':
+				msg.messageStubType = WAMessageStubType.GROUP_CHANGE_DESCRIPTION
+				msg.messageStubParameters = [ child.content === undefined ? '' : child.content?.[0].content ]
+				break
+			case 'invite':
+				msg.messageStubType = WAMessageStubType.GROUP_CHANGE_INVITE_LINK
+				msg.messageStubParameters = [ child.attrs.code ]
+				break
 			}
 		} else if(nodeType === 'mediaretry') {
 			const event = decodeMediaRetryNode(node)
